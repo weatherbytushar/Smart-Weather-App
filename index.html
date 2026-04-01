@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Weather</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-sunny">
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        
+        <!-- Header / Search Section -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-solid fa-cloud-sun-rain text-primary drop-shadow"></i>
+                <span data-i18n="appTitle">SmartWeather</span>
+            </div>
+            <div class="search-wrapper">
+                <div class="search-bar">
+                    <input type="text" id="cityInput" placeholder="Enter city name..." autocomplete="off" aria-label="Search city">
+                    <button id="voiceBtn" title="Voice Search"><i class="fa-solid fa-microphone"></i></button>
+                    <button id="searchBtn" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <button id="locationBtn" title="Use Current Location"><i class="fa-solid fa-location-crosshairs"></i></button>
+                </div>
+                <!-- Interactive Autocomplete Dropdown -->
+                <div id="autocompleteDropdown" class="autocomplete-dropdown">
+                    <!-- Options injected via JS -->
+                </div>
+            </div>
+            <div class="controls" style="display:flex; gap:10px; align-items:center;">
+                <select id="langToggle" class="unit-toggle" aria-label="Select Language" style="padding: 10px 15px; cursor: pointer; outline: none;">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी (Hindi)</option>
+                    <option value="mr">मराठी (Marathi)</option>
+                </select>
+                <button id="unitToggle" class="unit-toggle">°C / °F</button>
+            </div>
+        </header>
+
+        <!-- Error Message -->
+        <div id="errorMsg" class="error-msg" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <main id="weatherContent" class="weather-content" style="display: none;">
+            
+            <!-- Top Section: Current Weather & Suggestions -->
+            <div class="top-section">
+                
+                <!-- Current Weather Card -->
+                <div class="glass-card current-weather animate-item delay-1">
+                    <div class="city-info">
+                        <h1 id="cityName">City Name</h1>
+                        <p id="currentDate">Mon, 1 Jan</p>
+                    </div>
+                    
+                    <div class="weather-main">
+                        <div class="weather-icon-container">
+                            <i id="currentIcon" class="fa-solid fa-sun weather-icon"></i>
+                        </div>
+                        <div class="temperature">
+                            <span id="currentTemp">--</span><span id="tempUnit">°C</span>
+                        </div>
+                    </div>
+                    
+                    <p id="weatherDesc" class="weather-desc">Condition</p>
+                    
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <i class="fa-solid fa-droplet font-blue"></i>
+                            <div>
+                                <p class="detail-label" data-i18n="humidity">Humidity</p>
+                                <p id="humidityValue" class="detail-value">--%</p>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fa-solid fa-wind font-gray"></i>
+                            <div>
+                                <p class="detail-label" data-i18n="wind">Wind</p>
+                                <p id="windValue" class="detail-value">--</p>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i id="aqiIcon" class="fa-solid fa-leaf" style="color: #28a745;"></i>
+                            <div>
+                                <p class="detail-label" data-i18n="aqi">AQI</p>
+                                <p id="aqiValue" class="detail-value">--</p>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fa-solid fa-temperature-half" style="color: #ff9933;"></i>
+                            <div>
+                                <p class="detail-label" data-i18n="feelsLike">Feels Like</p>
+                                <p id="feelsLikeValue" class="detail-value">--°C</p>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fa-solid fa-sun" style="color: #fceabb;"></i>
+                            <div>
+                                <p class="detail-label" data-i18n="uvIndex">UV Index</p>
+                                <p id="uvIndexValue" class="detail-value">--</p>
+                            </div>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fa-solid fa-cloud-sun" style="color: #ffcc00;"></i>
+                            <div>
+                                <p class="detail-label" data-i18n="sunrise">Daylight</p>
+                                <p id="sunriseValue" class="detail-value" style="font-size: 1rem;">--:--</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Smart Suggestions Card -->
+                <div class="glass-card suggestions-card animate-item delay-2">
+                    <h2><i class="fa-regular fa-lightbulb"></i> <span data-i18n="suggestionsTitle">Smart Suggestions</span></h2>
+                    <div class="suggestion-content">
+                        <p id="suggestionText">Based on the current weather...</p>
+                    </div>
+                    <div class="suggestion-image">
+                        <i id="suggestionIcon" class="fa-solid fa-umbrella text-primary" style="font-size: 3.5rem; margin-top: 1.5rem;"></i>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Middle Section: Forecast and Chart -->
+            <div class="middle-section">
+                
+                <!-- 5-Day Forecast -->
+                <div class="glass-card forecast-container animate-item delay-3">
+                    <h2 data-i18n="forecastTitle">5-Day Forecast</h2>
+                    <div id="forecastCards" class="forecast-cards">
+                        <!-- Forecast cards will be injected here via JS -->
+                    </div>
+                </div>
+
+                <!-- Weather Chart -->
+                <div class="glass-card chart-container animate-item delay-4">
+                    <h2 data-i18n="chartTitle">Temperature Trend</h2>
+                    <div class="canvas-wrapper">
+                        <canvas id="weatherChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Section: Interactive Side-by-Side Comparison -->
+            <div class="bottom-section animate-item delay-4" style="margin-top: 2rem;">
+                <div class="glass-card compare-container" style="padding: 2rem;">
+                    <h2 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-code-compare" style="color: var(--primary-color);"></i>
+                        <span data-i18n="compareTitle">Compare Two Cities</span>
+                    </h2>
+                    <div class="compare-inputs" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+                        <input type="text" id="compareInput1" data-i18n-placeholder="placeholder" placeholder="Enter first city..." style="flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.2); outline: none; font-weight: 500;">
+                        <input type="text" id="compareInput2" data-i18n-placeholder="placeholder" placeholder="Enter second city..." style="flex: 1; padding: 12px 20px; border-radius: 25px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.2); outline: none; font-weight: 500;">
+                        <button id="compareBtn" style="padding: 12px 30px; border-radius: 25px; border: none; background: var(--primary-color); color: white; cursor: pointer; font-weight: 700; transition: transform 0.2s;">Compare</button>
+                    </div>
+                    <div id="compareResult" class="forecast-cards" style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+                        <!-- Results will appear here side-by-side -->
+                        <p style="opacity: 0.6; font-style: italic;">Enter two city names to start comparing...</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Bottom Section: Health Suggestion -->
+            <div class="bottom-section" style="margin-top: 2rem;">
+                <div class="glass-card health-card animate-item delay-5" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 2rem;">
+                    <h2 style="margin-bottom: 1rem;"><i class="fa-solid fa-heart-pulse" style="color: #ff4d4d; font-size: 1.5rem; margin-right: 10px;"></i> <span data-i18n="healthTitle">Health & Wellness</span></h2>
+                    <p id="healthText" style="font-size: 1.1rem; max-width: 700px; margin: 0 auto; line-height: 1.6; font-weight: 500;">Your health suggestion will appear here based on current conditions.</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Footer / Help Section -->
+        <footer class="footer">
+            <div class="help-section">
+                <h3 data-i18n="helpTitle">Need Help?</h3>
+                <p><span data-i18n="helpText">Allow location access or use the autocomplete search. For support, contact</span> <a href="mailto:support@smartweather.com">support@smartweather.com</a></p>
+            </div>
+            <p class="copyright" data-i18n="copyright">&copy; 2026 SmartWeather App. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+</body>
+</html>
